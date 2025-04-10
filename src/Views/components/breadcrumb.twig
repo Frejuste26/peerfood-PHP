@@ -1,0 +1,34 @@
+<div class="breadcrumb-container">
+    <div class="breadcrumb-header">
+        <h1 class="page-title">{{ title }}</h1>
+        <div class="breadcrumb-actions">
+            <a href="/statistics" class="btn btn-sm btn-outline-primary stats-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M3 3v17a1 1 0 0 0 1 1h17v-2H5V3H3z"/>
+                    <path d="M15.293 14.707a1 1 0 0 0 1.414 0l5-5-1.414-1.414L16 12.586l-2.293-2.293a1 1 0 0 0-1.414 0l-5 5 1.414 1.414L13 12.414l2.293 2.293z"/>
+                </svg>
+                Voir les statistiques
+            </a>
+        </div>
+    </div>
+    <nav class="breadcrumb-nav">
+        <ol class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="/" class="breadcrumb-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            <li class="breadcrumb-separator">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>{{ title }}</span>
+            </li>
+        </ol>
+    </nav>
+</div>

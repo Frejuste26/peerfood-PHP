@@ -1,0 +1,125 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}Gestion des Clients{% endblock %}
+
+{% block content %}
+    <!-- En-tête avec actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="clients-header">
+                <div class="header-title">
+                    <h1>Gestion des Clients</h1>
+                    <p class="text-muted">Gérez votre base clients et suivez leurs activités</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" data-action="add-client" aria-label="Ajouter un nouveau client">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                        </svg>
+                        Nouveau Client
+                    </button>
+                    <button class="btn btn-outline-primary" id="exportCsv" aria-label="Importer des clients">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        Exporter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="filters-container">
+                        <div class="search-box">
+                            <input type="text" id="searchClient" class="form-control" placeholder="Rechercher un client...">
+                        </div>
+                        <div class="filter-options">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="active">Actif</option>
+                                <option value="inactive">Inactif</option>
+                            </select>
+                            <select class="form-select" id="sortBy">
+                                <option value="name">Nom</option>
+                                <option value="date">Date d'inscription</option>
+                                <option value="orders">Nombre de commandes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des clients -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Commandes</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsList">
+                                {% for client in clients %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm">
+                                                <span class="avatar-title rounded-circle bg-primary">{{ client.name|slice(0, 1)|upper }}</span>
+                                            </div>
+                                            <div class="ms-3">
+                                                <h6 class="mb-0">{{ client.name }}</h6>
+                                                <small class="text-muted">Inscrit le {{ client.created_at|date("d/m/Y") }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ client.email }}</td>
+                                    <td>{{ client.phone }}</td>
+                                    <td>{{ client.orders_count }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ client.status == 'active' ? 'success' : 'danger' }}">
+                                            {{ client.status == 'active' ? 'Actif' : 'Inactif' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="{{ client.id }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="{{ client.id }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/js/clients.js"></script>
+{% endblock %}

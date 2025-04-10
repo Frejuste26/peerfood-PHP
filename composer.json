@@ -1,0 +1,25 @@
+{
+    "name": "app/peerfood",
+    "description": "Application de gestion de cantine scolaire",
+    "autoload": {
+        "psr-4": {
+            "Peerfood\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "FrejusteDev26",
+            "email": "keifrejuste26@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "guzzlehttp/psr7": "^2.7",
+        "nikic/fast-route": "^1.3",
+        "doctrine/dbal": "^4.2",
+        "twig/twig": "^3.20",
+        "respect/validation": "^2.4",
+        "monolog/monolog": "^3.9",
+        "illuminate/database": "^12.8"
+    }
+}

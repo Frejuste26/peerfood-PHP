@@ -1,0 +1,948 @@
+document.addEventListener('DOMContentLoaded', function() {
+    
+    async function fetchClients() {
+        try {
+            const response = await fetch('http://localhost:8086/customer', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+    
+            if (!response.ok) {
+                showNotification(`Erreur ${response.status}: ${response.statusText}`, 'error');
+            }
+
+            const json = await response.json(); // Récupère le JSON reçu du serveur
+    
+            const data = json.data ?? json; // Prend `json.data` si existant, sinon `json`
+    
+            console.log("Réponse du serveur:", data); // DEBUG
+    
+            if (!Array.isArray(data)) {
+                showNotification('Les données reçues ne sont pas un tableau');
+            }
+            const numClient = (id) => id > 0 ? `#CLD${String(id).padStart(4, '0')}` : "";
+    
+            const tbody = document.querySelector('.table tbody');
+            tbody.innerHTML = ""; // Vider le tableau avant d'ajouter les clients
+    
+            data.forEach(client => {
+                const status = client.status === "Enabled" ? "success" : "warning";
+                const isChecked = client.status === "Enabled" ? "checked" : "";
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="checkbox" class="form-check-input"></td>
+                    <td>
+                        <div class="client-info">
+                            <div class="client-avatar">${client.lastname?.charAt(0).toUpperCase() ?? ""}${client.firstname?.charAt(0).toUpperCase() ?? ""}</div>
+                            <div class="client-details">
+                                <h6>${client.lastname || "Inconnu"} ${client.firstname || ""}</h6>
+                                <span class="client-id">${numClient(client.id) ?? "N/A"}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${client.username || "Non renseigné"}</td>
+                    <td>${client.phone || "Non renseigné"}</td>
+                    <td>
+                        <div class="status-container d-flex align-items-center gap-2">
+                            <span class="status-badge badge ${status}">
+                            ${client.status || "Inconnu"}
+                        </span>
+                        <label class="status-switch">
+                            <input type="checkbox" class="status-toggle" ${isChecked}>
+                            <span class="switch-slider"></span>
+                        </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions"> 
+                            <button class="btn btn-sm btn-icon" data-action="view" title="Voir"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"> 
+                                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/> 
+                                </svg> 
+                            </button> 
+                            <button class="btn btn-sm btn-icon" data-action="edit" title="Modificateur"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"> 
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/> 
+                                </svg> 
+                            </button> 
+                            <button class="btn btn-sm btn-icon text-danger" data-action="delete" title="Supprimer"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"> 
+                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/> 
+                                </svg> 
+                            </button> 
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+    
+        } catch (error) {
+            console.error('Erreur de récupération des clients:', error);
+            alert('Impossible de charger les clients.');
+        }
+    }
+    
+    fetchClients();
+    
+    // Mise à jour des statuts en masse
+    const statusToggles = document.querySelectorAll('.status-toggle');
+    statusToggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const clientRow = this.closest('tr');
+            const clientId = clientRow.querySelector('.client-id').textContent;
+            const status = this.checked? 'Enabled' : 'Disabled';
+            updateClientStatus(clientId, status);
+            updateBulkActions();
+            updateSelectAll();
+            showNotification(`Statut du client ${clientId} mis à jour`, 'info');
+        })
+    });
+
+    // Mise à jour du statut d'un client
+    async function updateClientStatus(clientId, status) {
+        try {
+            const response = await fetch(`http://localhost:8086/customer/${clientId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            if (!response.ok) {
+                showNotification(`Erreur ${response.status}: ${response.statusText}`, 'error');
+            }
+            showNotification(`Statut du client ${clientId} mis à jour`, 'info');
+            fetchClients();
+            
+        } catch (error) {
+            console.error('Erreur de mise à jour du statut du client:', error);
+            alert('Impossible de mettre à jour le statut du client.');
+        }
+    }
+    
+    const statusToggle = document.querySelector('.status-toggle');
+    statusToggle.addEventListener('change', function() {
+        const clientRow = this.closest('tr');
+        const clientId = clientRow.querySelector('.client-id').textContent;
+        const status = this.checked? 'Enabled' : 'Disabled';
+        updateClientStatus(clientId, status);
+        updateBulkActions();
+        updateSelectAll();
+    });
+    function updateSelectAll() {
+        const checked = Array.from(document.querySelectorAll('tbody .form-check-input:checked')).length === document.querySelectorAll('tbody .form-check-input').length;
+        selectAllCheckbox.checked = checked;
+    }
+
+    const selectAllCheckbox = document.getElementById('selectAll');
+
+    function updateSelectAll() {
+        const checkboxes = document.querySelectorAll('tbody .form-check-input');
+        const allChecked = [...checkboxes].every(checkbox => checkbox.checked);
+        const someChecked = [...checkboxes].some(checkbox => checkbox.checked);
+
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = !allChecked && someChecked;
+    }
+
+    function updateBulkActions() {
+        const selectedCheckboxes = document.querySelectorAll('tbody .form-check-input:checked');
+        const bulkActions = document.getElementById('bulkActions'); // Remplace avec ton ID réel
+        if (bulkActions) {
+            bulkActions.style.display = selectedCheckboxes.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    function setupCheckboxListeners() {
+        const checkboxes = document.querySelectorAll('tbody .form-check-input');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectAll();
+                updateBulkActions();
+            });
+        });
+    }
+
+    selectAllCheckbox.addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('tbody .form-check-input');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkActions();
+    });
+
+    // Appelle setupCheckboxListeners() après fetchClients()
+    fetchClients().then(setupCheckboxListeners);
+
+    // Recherche en temps réel
+    const searchInput = document.querySelector('.search-box input');
+    searchInput.addEventListener('input', debounce(function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    }, 300));
+
+    // Gestion des filtres
+    const filters = document.querySelectorAll('[data-filter]');
+    filters.forEach(filter => {
+        filter.addEventListener('change', applyFilters);
+    });
+
+    // Réinitialisation des filtres
+    document.querySelector('[data-action="reset-filters"]').addEventListener('click', function() {
+        filters.forEach(filter => {
+            filter.value = '';
+        });
+        searchInput.value = '';
+        applyFilters();
+    });
+
+    // Actions sur les clients
+    document.querySelectorAll('[data-action]').forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.dataset.action;
+            switch(action) {
+                case 'add-client':
+                    showClientModal();
+                    break;
+                case 'import':
+                    showImportModal();
+                    break;
+                case 'view':
+                    showClientDetails(this.closest('tr'));
+                    break;
+                case 'edit':
+                    editClient(this.closest('tr'));
+                    break;
+                case 'delete':
+                    deleteClient(this.closest('tr'));
+                    break;
+            }
+        });
+    });
+
+    // Fonctions utilitaires
+    function updateSelectAll() {
+        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+        const someChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    function updateBulkActions() {
+        const selectedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+        const bulkActions = document.querySelector('.bulk-actions');
+        
+        if (selectedCount > 0) {
+            if (!bulkActions) {
+                createBulkActionsBar(selectedCount);
+            } else {
+                updateBulkActionsCount(selectedCount);
+            }
+        } else if (bulkActions) {
+            bulkActions.classList.remove('show');
+            setTimeout(() => bulkActions.remove(), 300);
+        }
+    }
+
+    function createBulkActionsBar(count) {
+        const bulkActions = document.createElement('div');
+        bulkActions.className = 'bulk-actions';
+        bulkActions.innerHTML = `
+            <span class="bulk-actions-count">${count} sélectionné(s)</span>
+            <button class="btn btn-outline-danger" data-action="bulk-delete">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Supprimer
+            </button>
+            <button class="btn btn-outline-primary" data-action="bulk-enable">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Activer
+            </button>
+            <button class="btn btn-outline-warning" data-action="bulk-disable">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Désactiver
+            </button>
+            <button class="btn btn-outline-secondary" data-action="bulk-export">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                </svg>
+                Exporter
+            </button>
+        `;
+        
+        document.body.appendChild(bulkActions);
+        setTimeout(() => bulkActions.classList.add('show'), 100);
+        
+        // Gestionnaires d'événements pour les actions en masse
+        bulkActions.querySelectorAll('[data-action]').forEach(button => {
+            button.addEventListener('click', handleBulkAction);
+        });
+    }
+
+    function updateBulkActionsCount(count) {
+        const countElement = document.querySelector('.bulk-actions-count');
+        if (countElement) {
+            countElement.textContent = `${count} sélectionné(s)`;
+        }
+    }
+
+    function handleBulkAction(e) {
+        const action = e.currentTarget.dataset.action;
+        const selectedRows = Array.from(checkboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.closest('tr'));
+        
+        switch(action) {
+            case 'bulk-edit':
+                showBulkEditModal(selectedRows);
+                break;
+            case 'bulk-delete':
+                confirmBulkDelete(selectedRows);
+                break;
+            case 'bulk-export':
+                exportSelectedClients(selectedRows);
+                break;
+        }
+    }
+
+    function confirmBulkDelete(rows) {
+        if (confirm(`Êtes-vous sûr de vouloir supprimer ${rows.length} client(s) ?`)) {
+            rows.forEach(row => row.remove());
+            showNotification(`${rows.length} client(s) supprimé(s) avec succès`, 'success');
+            updateBulkActions();
+        }
+    }
+
+    function exportSelectedClients(rows) {
+        const data = rows.map(row => ({
+            id: row.querySelector('.client-id').textContent,
+            name: row.querySelector('.client-details h6').textContent,
+            email: row.querySelector('td:nth-child(3)').textContent,
+            phone: row.querySelector('td:nth-child(4)').textContent,
+            status: row.querySelector('td:nth-child(5) .badge').textContent,
+            segment: row.querySelector('td:nth-child(6) .badge').textContent
+        }));
+        
+        const csv = convertToCSV(data);
+        downloadCSV(csv, 'clients_export.csv');
+    }
+
+    function convertToCSV(data) {
+        const headers = Object.keys(data[0]);
+        const rows = data.map(obj => headers.map(header => obj[header]));
+        return [headers, ...rows].map(row => row.join(',')).join('\n');
+    }
+
+    function downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    function applyFilters() {
+        const activeFilters = Array.from(filters)
+            .filter(filter => filter.value)
+            .map(filter => ({
+                type: filter.dataset.filter,
+                value: filter.value.toLowerCase()
+            }));
+
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const matches = activeFilters.every(filter => {
+                const cell = row.querySelector(`td[data-${filter.type}]`);
+                return cell && cell.textContent.toLowerCase().includes(filter.value);
+            });
+            row.style.display = matches ? '' : 'none';
+        });
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Fonctions modales
+    function showClientModal(client = null) {
+        // Implémenter l'affichage du formulaire client
+    }
+
+    function showImportModal() {
+        // Implémenter la modal d'import
+    }
+
+    function showClientDetails(row) {
+        // Implémenter l'affichage des détails du client
+    }
+
+    function editClient(row) {
+        const clientData = {
+            id: row.querySelector('.client-id').textContent,
+            name: row.querySelector('.client-details h6').textContent,
+            username: row.querySelector('td:nth-child(3)').textContent,
+            phone: row.querySelector('td:nth-child(4)').textContent,
+            status: row.querySelector('.badge').textContent === 'Actif' ? 'active' : 'inactive'
+        };
+
+        openModalForEdit(clientData, row);
+    }
+
+    function openModalForEdit(clientData, rowToUpdate) {
+        // Mettre à jour le titre et le texte du bouton
+        document.querySelector('.modal-title').textContent = 'Modifier Client';
+        document.querySelector('.button-text').textContent = 'Mettre à jour';
+        
+        // Remplir le formulaire avec les données existantes
+        const inputs = {
+            name: document.getElementById('clientName'),
+            username: document.getElementById('clientUsername'),
+            phone: document.getElementById('clientPhone')
+        };
+
+        inputs.name.value = clientData.name;
+        inputs.username.value = clientData.username;
+        inputs.phone.value = clientData.phone;
+
+        // Stocker la référence à la ligne à mettre à jour
+        modal.dataset.editMode = 'true';
+        modal.dataset.rowId = clientData.id;
+
+        // Modifier le comportement du bouton de sauvegarde
+        const saveButton = document.getElementById('saveClient');
+        const originalClickHandler = saveButton.onclick;
+        
+        saveButton.onclick = async () => {
+            if (validateForm()) {
+                try {
+                    saveButton.classList.add('btn-loading');
+                    
+                    // Simuler un délai de traitement
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    const updatedData = {
+                        name: inputs.name.value.trim(),
+                        username: inputs.username.value.trim(),
+                        phone: inputs.phone.value.trim(),
+                        status: clientData.status // Conserver le statut existant
+                    };
+
+                    updateClientRow(rowToUpdate, updatedData);
+                    closeModal();
+                    showNotification('Client modifié avec succès', 'success');
+                } catch (error) {
+                    showNotification(error.message, 'error');
+                } finally {
+                    saveButton.classList.remove('btn-loading');
+                }
+            }
+        };
+
+        // Ouvrir le modal
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        // Nettoyer lors de la fermeture
+        const cleanup = () => {
+            saveButton.onclick = originalClickHandler;
+            modal.dataset.editMode = 'false';
+            delete modal.dataset.rowId;
+            document.querySelector('.modal-title').textContent = 'Nouveau Client';
+            document.querySelector('.button-text').textContent = 'Enregistrer';
+        };
+
+        // Ajouter le nettoyage à la fonction de fermeture
+        const originalCloseModal = closeModal;
+        closeModal = () => {
+            originalCloseModal();
+            cleanup();
+        };
+    }
+
+    function updateClientRow(row, updatedData) {
+        // Mettre à jour les initiales
+        const initials = updatedData.name.split(' ').map(n => n[0]).join('');
+        row.querySelector('.client-avatar').textContent = initials;
+        
+        // Mettre à jour le nom
+        row.querySelector('.client-details h6').textContent = updatedData.name;
+        
+        // Mettre à jour le nom d'utilisateur
+        row.querySelector('td:nth-child(3)').textContent = updatedData.username;
+        
+        // Mettre à jour le téléphone
+        row.querySelector('td:nth-child(4)').textContent = updatedData.phone;
+
+        // Ajouter une animation de mise à jour
+        row.classList.add('row-updated');
+        setTimeout(() => row.classList.remove('row-updated'), 1000);
+    }
+
+    function deleteClient(row) {
+        const clientName = row.querySelector('.client-details h6').textContent;
+        
+        const confirmation = showConfirmDialog({
+            title: 'Confirmer la suppression',
+            message: `Êtes-vous sûr de vouloir supprimer le client "${clientName}" ?`,
+            confirmText: 'Supprimer',
+            cancelText: 'Annuler',
+            type: 'danger'
+        });
+
+        if (confirmation) {
+            try {
+                animateRowDeletion(row);
+                showNotification('Client supprimé avec succès', 'success');
+            } catch (error) {
+                showNotification('Erreur lors de la suppression', 'error');
+            }
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            ${getNotificationIcon(type)}
+            <div class="notification-content">
+                <div class="notification-message">${message}</div>
+                <div class="notification-progress"></div>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+        requestAnimationFrame(() => notification.classList.add('show'));
+
+        const progress = notification.querySelector('.notification-progress');
+        progress.style.animation = 'notification-progress 3s linear forwards';
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function getNotificationIcon(type) {
+        switch(type) {
+            case 'success':
+                return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="var(--green-500)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+            case 'error':
+                return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="var(--red-500)"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+            default:
+                return '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="var(--blue-500)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>';
+        }
+    }
+
+    // Gestion du modal
+    const modal = document.getElementById('newClientModal');
+    const addClientBtn = document.querySelector('[data-action="add-client"]');
+    const closeButtons = document.querySelectorAll('[data-dismiss="modal"]');
+    const saveClientBtn = document.getElementById('saveClient');
+    const clientForm = document.getElementById('newClientForm');
+
+    // Ouvrir le modal
+    addClientBtn.addEventListener('click', () => {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    });
+
+    // Fermer le modal
+    function closeModal() {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+        clientForm.reset();
+    }
+
+    closeButtons.forEach(button => {
+        button.addEventListener('click', closeModal);
+    });
+
+    // Fermer le modal en cliquant à l'extérieur
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Amélioration de la gestion du modal
+    function initializeModal() {
+        const inputs = {
+            name: document.getElementById('clientName'),
+            username: document.getElementById('clientUsername'),
+            phone: document.getElementById('clientPhone')
+        };
+
+        // Validation en temps réel du nom
+        inputs.name.addEventListener('input', (e) => {
+            const value = e.target.value.trim();
+            const isValid = /^[a-zA-ZÀ-ÿ]+(?: [a-zA-ZÀ-ÿ]+)*$/.test(value);
+            
+            if (value && !isValid) {
+                showFieldError(e.target, 'Le nom doit contenir uniquement des lettres et espaces');
+            } else {
+                clearFieldError(e.target);
+            }
+            
+            // Mise à jour des initiales en temps réel
+            const preview = document.querySelector('.preview-initials');
+            if (preview) {
+                preview.textContent = value.split(' ').map(n => n[0]).join('').toUpperCase();
+            }
+        });
+
+        // Validation en temps réel du nom d'utilisateur
+        inputs.username.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value.length > 0) {
+                if (value.length < 3) {
+                    showFieldError(e.target, 'Minimum 3 caractères requis');
+                } else if (value.length > 20) {
+                    showFieldError(e.target, 'Maximum 20 caractères autorisés');
+                } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                    showFieldError(e.target, 'Caractères autorisés : lettres, chiffres et _');
+                } else {
+                    clearFieldError(e.target);
+                }
+            }
+        });
+
+        // Formatage automatique du numéro de téléphone
+        inputs.phone.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            
+            if (value.length > 0) {
+                // Format: 06 12 34 56 78
+                value = value.match(/.{1,2}/g).join(' ');
+                e.target.value = value;
+                
+                // Validation du format
+                const isValid = /^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/.test(value);
+                if (!isValid) {
+                    showFieldError(e.target, 'Format invalide (ex: 06 12 34 56 78)');
+                } else {
+                    clearFieldError(e.target);
+                }
+            }
+        });
+
+        // Gestion de la soumission du formulaire
+        saveClientBtn.addEventListener('click', async () => {
+            if (validateForm()) {
+                try {
+                    saveClientBtn.classList.add('btn-loading');
+                    await saveClient();
+                    closeModal();
+                    showNotification('Client ajouté avec succès', 'success');
+                } catch (error) {
+                    showNotification(error.message, 'error');
+                } finally {
+                    saveClientBtn.classList.remove('btn-loading');
+                }
+            }
+        });
+
+        // Fonctions utilitaires
+        function showFieldError(element, message) {
+            element.classList.add('invalid');
+            const messageEl = element.nextElementSibling;
+            if (messageEl && messageEl.classList.contains('validation-message')) {
+                messageEl.textContent = message;
+                messageEl.style.display = 'block';
+            }
+        }
+
+        function clearFieldError(element) {
+            element.classList.remove('invalid');
+            const messageEl = element.nextElementSibling;
+            if (messageEl && messageEl.classList.contains('validation-message')) {
+                messageEl.style.display = 'none';
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            Object.values(inputs).forEach(input => {
+                if (!input.checkValidity()) {
+                    showFieldError(input, input.validationMessage);
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+
+        async function saveClient() {
+            // Simuler un délai de traitement
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const formData = {
+                name: inputs.name.value.trim(),
+                username: inputs.username.value.trim(),
+                phone: inputs.phone.value.trim(),
+                status: 'active' // Statut par défaut
+            };
+
+            // Ici, vous pourriez ajouter une vraie requête API
+            addClientToTable(formData);
+        }
+    }
+
+    // Initialiser le modal
+    initializeModal();
+
+    function addClientToTable(client) {
+        const tbody = document.querySelector('tbody');
+        const tr = document.createElement('tr');
+        
+        const initials = client.name.split(' ').map(n => n[0]).join('');
+        
+        tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="form-check-input">
+            </td>
+            <td>
+                <div class="client-info">
+                    <div class="client-avatar">
+                        ${initials}
+                    </div>
+                    <div class="client-details">
+                        <h6>${client.name}</h6>
+                        <span class="client-id">#CLI${Math.floor(1000 + Math.random() * 9000)}</span>
+                    </div>
+                </div>
+            </td>
+            <td>${client.username}</td>
+            <td>${client.phone}</td>
+            <td>
+                <div class="status-container d-flex align-items-center gap-2">
+                    <span class="status-badge badge ${client.status === 'active' ? 'success' : 'warning'}">
+                        ${client.status === 'active' ? 'Actif' : 'Inactif'}
+                    </span>
+                    <label class="status-switch">
+                        <input type="checkbox" class="status-toggle" ${client.status === 'active' ? 'checked' : ''}>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </td>
+            <td>
+                <div class="actions">
+                    <button class="btn btn-sm btn-icon" data-action="view" title="Voir">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-icon" data-action="edit" title="Modifier">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-icon text-danger" data-action="delete" title="Supprimer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        // Ajouter l'écouteur d'événements pour le nouveau toggle
+        const newToggle = tr.querySelector('.status-toggle');
+        newToggle.addEventListener('change', async (e) => {
+            const row = e.target.closest('tr');
+            const statusBadge = row.querySelector('.status-badge');
+            const clientName = row.querySelector('.client-details h6').textContent;
+            
+            try {
+                // Animer le changement
+                statusBadge.classList.add('fade-out');
+                
+                // Simuler un appel API
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // Mettre à jour le statut
+                const newStatus = e.target.checked ? 'Actif' : 'Inactif';
+                const newClass = e.target.checked ? 'success' : 'warning';
+                
+                // Mettre à jour le badge
+                statusBadge.className = `status-badge badge ${newClass}`;
+                statusBadge.textContent = newStatus;
+                
+                // Animer l'apparition du nouveau statut
+                statusBadge.classList.remove('fade-out');
+                statusBadge.classList.add('fade-in');
+                
+                // Notification
+                showNotification(
+                    `Le client ${clientName} est maintenant ${newStatus.toLowerCase()}`,
+                    e.target.checked ? 'success' : 'warning'
+                );
+                
+            } catch (error) {
+                // En cas d'erreur, remettre le toggle dans son état précédent
+                e.target.checked = !e.target.checked;
+                showNotification('Erreur lors du changement de statut', 'error');
+            }
+        });
+        
+        tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    // Amélioration de la recherche avec highlight
+    function highlightSearchResults(searchTerm) {
+        const rows = document.querySelectorAll('tbody tr');
+        if (!searchTerm) {
+            rows.forEach(row => {
+                row.querySelectorAll('td').forEach(td => {
+                    td.innerHTML = td.innerHTML.replace(/<mark>(.*?)<\/mark>/g, '$1');
+                });
+            });
+            return;
+        }
+
+        const regex = new RegExp(searchTerm, 'gi');
+        rows.forEach(row => {
+            row.querySelectorAll('td').forEach(td => {
+                if (!td.querySelector('.actions')) {
+                    const text = td.innerText;
+                    td.innerHTML = text.replace(regex, match => `<mark>${match}</mark>`);
+                }
+            });
+        });
+    }
+
+    // Animation lors de la suppression
+    function animateRowDeletion(row) {
+        return new Promise(resolve => {
+            row.style.transition = 'all 0.5s ease';
+            row.style.transform = 'translateX(100%)';
+            row.style.opacity = '0';
+            
+            setTimeout(() => {
+                row.style.height = row.offsetHeight + 'px';
+                row.style.height = '0';
+                row.style.padding = '0';
+                row.style.margin = '0';
+                
+                setTimeout(() => {
+                    row.remove();
+                    resolve();
+                }, 500);
+            }, 500);
+        });
+    }
+
+    // Dialogue de confirmation personnalisé
+    function showConfirmDialog({ title, message, confirmText, cancelText, type }) {
+        return new Promise(resolve => {
+            const dialog = document.createElement('div');
+            dialog.className = 'confirm-dialog modal';
+            dialog.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5>${title}</h5>
+                            <button type="button" class="modal-close" data-action="cancel">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-action="cancel">${cancelText}</button>
+                            <button type="button" class="btn btn-${type}" data-action="confirm">${confirmText}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(dialog);
+            setTimeout(() => dialog.classList.add('show'), 50);
+
+            function handleAction(confirmed) {
+                dialog.classList.remove('show');
+                setTimeout(() => {
+                    dialog.remove();
+                    resolve(confirmed);
+                }, 300);
+            }
+
+            dialog.addEventListener('click', e => {
+                const action = e.target.closest('[data-action]')?.dataset.action;
+                if (action === 'confirm') handleAction(true);
+                if (action === 'cancel') handleAction(false);
+                if (e.target === dialog) handleAction(false);
+            });
+        });
+    }
+
+    // Gestion du changement de statut
+    document.querySelectorAll('.status-toggle').forEach(toggle => {
+        toggle.addEventListener('change', async (e) => {
+            const row = e.target.closest('tr');
+            const statusBadge = row.querySelector('.status-badge');
+            const clientName = row.querySelector('.client-details h6').textContent;
+            
+            try {
+                // Animer le changement
+                statusBadge.classList.add('fade-out');
+                
+                // Simuler un appel API
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                // Mettre à jour le statut
+                const newStatus = e.target.checked ? 'Actif' : 'Inactif';
+                const newClass = e.target.checked ? 'success' : 'warning';
+                
+                // Mettre à jour le badge
+                statusBadge.className = `status-badge badge ${newClass}`;
+                statusBadge.textContent = newStatus;
+                
+                // Animer l'apparition du nouveau statut
+                statusBadge.classList.remove('fade-out');
+                statusBadge.classList.add('fade-in');
+                
+                // Notification
+                showNotification(
+                    `Le client ${clientName} est maintenant ${newStatus.toLowerCase()}`,
+                    e.target.checked ? 'success' : 'warning'
+                );
+                
+            } catch (error) {
+                // En cas d'erreur, remettre le toggle dans son état précédent
+                e.target.checked = !e.target.checked;
+                showNotification('Erreur lors du changement de statut', 'error');
+            }
+        });
+    });
+
+    // Fonction utilitaire pour mettre à jour le statut
+    async function updateClientStatus(clientId, newStatus) {
+        try {
+            // Ici, vous ajouteriez l'appel à votre API
+            await new Promise(resolve => setTimeout(resolve, 600)); // Simulation
+            return true;
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour du statut:', error);
+            throw error;
+        }
+    }
+}); 

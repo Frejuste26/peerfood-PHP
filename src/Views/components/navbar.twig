@@ -1,0 +1,37 @@
+<header class="topbar" role="banner">
+    <nav class="navbar" aria-label="Navigation principale">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="sidebar">
+            <span aria-hidden="true">☰</span>
+        </button>
+        <ul class="navbar-nav float-end">
+            <li class="nav-item dropdown">
+                <button class="nav-link dropdown-toggle text-muted waves-effect waves-dark pro-pic" id="navbarDropdown" aria-haspopup="true" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M20 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-6 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM19 15H9v-.25C9 12.901 11.254 11 14 11s5 1.901 5 3.75V15z"></path>
+                        <path d="M4 8H2v12c0 1.103.897 2 2 2h12v-2H4V8z"></path>
+                    </svg>
+                    <span class="visually-hidden">Menu utilisateur</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end user-dd" aria-labelledby="navbarDropdown">
+                    <li>
+                        <a class="dropdown-item" href="/profile">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm9 11v-1a7 7 0 0 0-7-7h-4a7 7 0 0 0-7 7v1h2v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1z"></path>
+                            </svg>
+                            <span>Mon Profil</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/logout">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="m10.998 16 5-4-5-4v3h-9v2h9z"></path>
+                                <path d="M12.999 2.999a8.938 8.938 0 0 0-6.364 2.637L8.049 7.05c1.322-1.322 3.08-2.051 4.95-2.051s3.628.729 4.95 2.051S20 10.13 20 12s-.729 3.628-2.051 4.95-3.08 2.051-4.95 2.051-3.628-.729-4.95-2.051l-1.414 1.414c1.699 1.7 3.959 2.637 6.364 2.637s4.665-.937 6.364-2.637C21.063 16.665 22 14.405 22 12s-.937-4.665-2.637-6.364a8.938 8.938 0 0 0-6.364-2.637z"></path>
+                            </svg>
+                            <span>Déconnexion</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>

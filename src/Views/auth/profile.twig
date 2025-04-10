@@ -1,0 +1,52 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Mon Profil - PeerFood{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>Mon Profil</h1>
+
+    {% if success %}
+        <div class="alert alert-success">
+            {{ success }}
+        </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="profile-info">
+        <form action="{{ base_url }}/profile/update" method="POST" class="profile-form">
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" value="{{ user.username }}" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Nom complet</label>
+                <input type="text" id="name" name="name" value="{{ user.name }}" class="form-control" required>
+            </div>
+
+            {% if user.role == 'customer' %}
+            <div class="customer-details">
+                <h3>Informations client</h3>
+                <div class="form-group">
+                    <label for="phone">Téléphone</label>
+                    <input type="tel" id="phone" name="customer_details[phone]" value="{{ user.customer_details.phone }}" class="form-control">
+                </div>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Mettre à jour le profil</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

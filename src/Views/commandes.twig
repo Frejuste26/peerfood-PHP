@@ -1,0 +1,154 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <!-- header avec des statistiques -->
+    <div class="orders-header">
+        <div class="stats-cards">
+            <div class="stat-card analytics">
+                <div class="stat-icon bg-primary-gradient">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H6v-2h4V7h2v4h4v2h-4v4z"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">
+                        <span class="counter" data-target="{{ total_orders|default(2451) }}">0</span>
+                    </div>
+                    <p>Total Commandes</p>
+                    <div class="stat-trend up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M7 14l5-5 5 5H7z"/>
+                        </svg>
+                        <span>+12.5% vs mois dernier</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card analytics">
+                <div class="stat-icon bg-warning-gradient">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">
+                        <span class="counter" data-target="{{ pending_orders|default(18) }}">0</span>
+                    </div>
+                    <p>Commandes en attente</p>
+                    <div class="stat-trend down">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5H7z"/>
+                        </svg>
+                        <span>-3.2% vs mois dernier</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card analytics">
+                <div class="stat-icon bg-success-gradient">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+                    </svg>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">
+                        <span class="counter" data-target="{{ completed_orders|default(2433) }}">0</span>
+                    </div>
+                    <p>Commandes complétées</p>
+                    <div class="stat-trend up">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M7 14l5-5 5 5H7z"/>
+                        </svg>
+                        <span>+15.8% vs mois dernier</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des commandes -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="table-header">
+                <div class="search-filters">
+                    <div class="search-box">
+                        <input type="text" class="form-control" placeholder="Rechercher une commande...">
+                    </div>
+                    <div class="filters">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tous les statuts</option>
+                            <option value="pending">En attente</option>
+                            <option value="processing">En cours</option>
+                            <option value="completed">Terminée</option>
+                            <option value="cancelled">Annulée</option>
+                        </select>
+                        <select class="form-select" id="dateFilter">
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="custom">Personnalisé</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID Commande</th>
+                            <th>Client</th>
+                            <th>Date</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title rounded-circle bg-primary">{{ order.client_name|slice(0, 1)|upper }}</span>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-0">{{ order.client_name }}</h6>
+                                        <small class="text-muted">{{ order.client_email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ order.date|date("d/m/Y H:i") }}</td>
+                            <td>{{ order.amount|number_format(2, ',', ' ') }} €</td>
+                            <td>
+                                <span class="badge bg-{{ order.status_class }}">{{ order.status_label }}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" data-action="view" data-id="{{ order.id }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" data-action="edit" data-id="{{ order.id }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/js/orders.js"></script>
+{% endblock %}

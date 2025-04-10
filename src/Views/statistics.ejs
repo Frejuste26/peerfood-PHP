@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> détaillées</title>
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include("./Components/loader.ejs") %>
+    <div class="app-container">
+        <%- include("./Components/sidebare.ejs") %>
+        <div class="page-wrapper">
+            <%- include("./Components/navbar.ejs") %>
+            <div class="page-breadcrumb">
+                <%- include("./Components/breadcrumb.ejs") %>
+            </div>
+            
+            <div class="container-fluid">
+                <!-- Ajout d'un système d'onglets pour différentes vues -->
+                <div class="view-tabs mb-4">
+                    <button class="view-tab active" data-view="general">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                        </svg>
+                        Vue générale
+                    </button>
+                    <button class="view-tab" data-view="sales">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                        Ventes détaillées
+                    </button>
+                    <button class="view-tab" data-view="customers">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
+                        Analyse clients
+                    </button>
+                    <button class="view-tab" data-view="predictions">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+                        </svg>
+                        Prédictions
+                    </button>
+                </div>
+
+                <!-- Ajout d'un résumé rapide -->
+                <div class="quick-summary mb-4">
+                    <div class="summary-header">
+                        <h6>Résumé rapide</h6>
+                        <span class="last-update">Dernière mise à jour: il y a 5 minutes</span>
+                    </div>
+                    <div class="summary-content">
+                        <p class="highlight-text">Les ventes ont augmenté de 23% par rapport à la même période l'année dernière</p>
+                        <div class="key-changes">
+                            <span class="change-item positive">Nouveaux clients +15%</span>
+                            <span class="change-item negative">Taux d'abandon -3%</span>
+                            <span class="change-item positive">Panier moyen +7%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards améliorées -->
+                <div class="row">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="stats-card analytics">
+                            <div class="stats-icon conversion">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+                                </svg>
+                            </div>
+                            <div class="stats-info">
+                                <h3 data-target="4.5">0</h3>
+                                <p>Taux de conversion (%)</p>
+                                <div class="stats-progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                    <span>Objectif: 6%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="stats-card analytics">
+                            <div class="stats-icon revenue">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                                </svg>
+                            </div>
+                            <div class="stats-info">
+                                <h3 data-target="89450">0</h3>
+                                <p>Revenu total (€)</p>
+                                <div class="stats-progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                    <span>Objectif: 6%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="stats-card analytics">
+                            <div class="stats-icon orders">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                                </svg>
+                            </div>
+                            <div class="stats-info">
+                                <h3 data-target="1234">0</h3>
+                                <p>Commandes</p>
+                                <div class="stats-progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                    <span>Objectif: 6%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="stats-card analytics">
+                            <div class="stats-icon customers">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                                </svg>
+                            </div>
+                            <div class="stats-info">
+                                <h3 data-target="856">0</h3>
+                                <p>Nouveaux clients</p>
+                                <div class="stats-progress">
+                                    <div class="progress-bar" style="width: 75%"></div>
+                                    <span>Objectif: 6%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtres globaux -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="filters-card">
+                            <div class="filters-header">
+                                <h5>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                                    </svg>
+                                    Filtres d'analyse
+                                </h5>
+                                <button class="btn btn-sm btn-outline-primary" id="saveFilters">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                        <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                                    </svg>
+                                    Sauvegarder les filtres
+                                </button>
+                            </div>
+                            <div class="filters-body">
+                                <div class="filter-group">
+                                    <label>Période</label>
+                                    <div class="date-range-picker">
+                                        <input type="date" class="form-control" id="startDate">
+                                        <span>à</span>
+                                        <input type="date" class="form-control" id="endDate">
+                                    </div>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Comparaison</label>
+                                    <select class="form-select" id="compareWith">
+                                        <option value="previous">Période précédente</option>
+                                        <option value="lastYear">Année précédente</option>
+                                        <option value="custom">Personnalisé</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Granularité</label>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary active">Jour</button>
+                                        <button class="btn btn-sm btn-outline-primary">Semaine</button>
+                                        <button class="btn btn-sm btn-outline-primary">Mois</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques principaux avec améliorations -->
+                <div class="row mt-4">
+                    <div class="col-12 col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">Évolution des ventes</h5>
+                                    <div class="chart-controls d-flex gap-2">
+                                        <div class="chart-type-selector btn-group">
+                                            <button class="btn btn-sm btn-outline-primary active" data-type="line" title="Graphique en ligne">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" data-type="bar" title="Graphique en barres">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" data-type="area" title="Graphique en aire">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="chart-actions">
+                                            <button class="btn btn-sm btn-outline-primary" data-chart-export title="Exporter">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" data-chart-fullscreen title="Plein écran">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary" data-chart-refresh title="Actualiser">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chart-metrics mt-3">
+                                    <div class="metric">
+                                        <span class="metric-label">Total</span>
+                                        <span class="metric-value">152,420 €</span>
+                                        <span class="metric-change positive">+12.3%</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Moyenne</span>
+                                        <span class="metric-value">12,702 €</span>
+                                        <span class="metric-change positive">+8.7%</span>
+                                    </div>
+                                    <div class="metric">
+                                        <span class="metric-label">Maximum</span>
+                                        <span class="metric-value">18,450 €</span>
+                                        <span class="metric-change negative">-2.1%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="annualSalesChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Répartition des ventes</h5>
+                                <div class="card-tools">
+                                    <div class="chart-legend"></div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="salesDistributionChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Analyse avancée -->
+                <div class="row mt-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Prévisions de croissance</h5>
+                                <div class="card-tools">
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary active">Court terme</button>
+                                        <button class="btn btn-sm btn-outline-primary">Moyen terme</button>
+                                        <button class="btn btn-sm btn-outline-primary">Long terme</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="forecast-details">
+                                    <div class="forecast-summary">
+                                        <h6>Croissance estimée</h6>
+                                        <div class="forecast-value">+15.3%</div>
+                                        <div class="forecast-range">
+                                            <span>Min: +12.1%</span>
+                                            <span>Max: +18.5%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="growthForecastChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Analyse des tendances</h5>
+                                <div class="card-tools">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Exporter les données">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H6v-2h6v2zm4-4H6v-2h10v2zm0-4H6V7h10v2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="trends-filters">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" checked>
+                                        <label class="form-check-label">Saisonnalité</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" checked>
+                                        <label class="form-check-label">Tendance</label>
+                                    </div>
+                                </div>
+                                <div id="trendAnalysisChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section KPIs -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Métriques clés de performance</h5>
+                                <div class="card-tools">
+                                    <button class="btn btn-sm btn-outline-primary">Personnaliser</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="metrics-grid">
+                                    <!-- Les métriques seront générées dynamiquement -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nouvelle section d'insights -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Insights automatiques</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="insights-grid">
+                                    <div class="insight-card">
+                                        <div class="insight-priority high">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                                            </svg>
+                                            Priorité haute
+                                        </div>
+                                        <div class="insight-content">
+                                            <h6>Opportunité détectée</h6>
+                                            <p>Les clients qui achètent le produit A achètent souvent le produit B dans les 30 jours</p>
+                                            <div class="insight-metrics">
+                                                <div class="metric">
+                                                    <span class="metric-value">78%</span>
+                                                    <span class="metric-label">Taux de corrélation</span>
+                                                </div>
+                                                <div class="metric">
+                                                    <span class="metric-value">+12k€</span>
+                                                    <span class="metric-label">Revenu potentiel</span>
+                                                </div>
+                                            </div>
+                                            <div class="insight-actions">
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                                                    </svg>
+                                                    Créer une campagne
+                                                </button>
+                                                <button class="btn btn-sm btn-link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                                    </svg>
+                                                    Voir les détails
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- ... autres insights ... -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <%- include("./Components/footer.ejs") %>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js" integrity="sha256-AlTido85uXPlSyyaZNsjJXeCs07eSv3r43kyCVc8ChI=" crossorigin="anonymous"></script>
+    <script src="/js/theme.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/js/statistics.js"></script>
+    <script>
+            window.addEventListener('load', function() {
+        // Cache le loader après le chargement complet
+        const loader = document.querySelector('.loader-wrapper');
+        setTimeout(() => {
+            loader.classList.add('loader-hidden');
+        }, 1000); // 1 seconde de délai pour montrer le loader
+        
+        // Supprime le loader après la transition
+        loader.addEventListener('transitionend', () => {
+                document.body.removeChild(loader);
+            });
+        });
+    </script>
+</body>
+</html> 
